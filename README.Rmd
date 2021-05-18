@@ -32,7 +32,7 @@ To demonstrate our approach, we provide a shortened version of the application f
 data(covid_data)
 
 # formula for covariates
-xformla <- ~ current + current^2 + current^3 + region + totalTestResults
+xformla <- ~ current + I(current^2) + I(current^2) + region + totalTestResults
 ```
 
 A first issue is that there are major overlap violations  --- for example, there are just not good comparison states for New York.  As a first step, we drop those:
