@@ -36,7 +36,7 @@ xformla <- ~ current + current^2 + current^3 + region + totalTestResults
 ```
 
 A first issue is that there are major overlap violations  --- for example, there are just not good comparison states for New York.  As a first step, we drop those:
-```{r}
+```{r echo=FALSE}
 trim_id_list <- lapply(c(10,15,20,25,30),
                        did::trimmer,
                        tname="time.period",
@@ -47,7 +47,9 @@ trim_id_list <- lapply(c(10,15,20,25,30),
                        control_group="nevertreated",
                        threshold=0.95)
 time_id_list <- unlist(trim_id_list)
+```
 
+```{r}
 # states that we will drop
 unique(subset(covid_data, state_id %in% time_id_list)$state)
 covid_data2 <- subset(covid_data, !(state_id %in% time_id_list))

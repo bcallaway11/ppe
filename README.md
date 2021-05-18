@@ -50,64 +50,54 @@ A first issue is that there are major overlap violations — for example,
 there are just not good comparison states for New York. As a first step,
 we drop those:
 
+    #> Warning: glm.fit: algorithm did not converge
+    #> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+    #> [1] "hard to match treated observations: "
+    #> # A tibble: 4 x 1
+    #>   state_id
+    #>      <int>
+    #> 1        5
+    #> 2       15
+    #> 3       32
+    #> 4       35
+    #> [1] "hard to match treated observations: "
+    #> # A tibble: 5 x 1
+    #>   state_id
+    #>      <int>
+    #> 1        7
+    #> 2       19
+    #> 3       23
+    #> 4       47
+    #> 5       48
+    #> [1] "hard to match treated observations: "
+    #> # A tibble: 3 x 1
+    #>   state_id
+    #>      <int>
+    #> 1       31
+    #> 2       39
+    #> 3       40
+    #> Warning: glm.fit: algorithm did not converge
+    
+    #> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+    #> [1] "hard to match treated observations: "
+    #> # A tibble: 7 x 1
+    #>   state_id
+    #>      <int>
+    #> 1        2
+    #> 2       10
+    #> 3       11
+    #> 4       22
+    #> 5       25
+    #> 6       26
+    #> 7       44
+    #> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+    #> [1] "hard to match treated observations: "
+    #> # A tibble: 1 x 1
+    #>   state_id
+    #>      <int>
+    #> 1       41
+
 ``` r
-trim_id_list <- lapply(c(10,15,20,25,30),
-                       did::trimmer,
-                       tname="time.period",
-                       idname="state_id",
-                       gname="group",
-                       xformla=xformla,
-                       data=covid_data,
-                       control_group="nevertreated",
-                       threshold=0.95)
-#> Warning: glm.fit: algorithm did not converge
-#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-#> [1] "hard to match treated observations: "
-#> # A tibble: 4 x 1
-#>   state_id
-#>      <int>
-#> 1        5
-#> 2       15
-#> 3       32
-#> 4       35
-#> [1] "hard to match treated observations: "
-#> # A tibble: 5 x 1
-#>   state_id
-#>      <int>
-#> 1        7
-#> 2       19
-#> 3       23
-#> 4       47
-#> 5       48
-#> [1] "hard to match treated observations: "
-#> # A tibble: 3 x 1
-#>   state_id
-#>      <int>
-#> 1       31
-#> 2       39
-#> 3       40
-#> Warning: glm.fit: algorithm did not converge
-
-#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-#> [1] "hard to match treated observations: "
-#> # A tibble: 7 x 1
-#>   state_id
-#>      <int>
-#> 1        2
-#> 2       10
-#> 3       11
-#> 4       22
-#> 5       25
-#> 6       26
-#> 7       44
-#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
-#> [1] "hard to match treated observations: "
-#> # A tibble: 1 x 1
-#>   state_id
-#>      <int>
-#> 1       41
-time_id_list <- unlist(trim_id_list)
-
 # states that we will drop
 unique(subset(covid_data, state_id %in% time_id_list)$state)
 #>  [1] "AL" "CA" "CT" "FL" "GA" "IL" "LA" "ME" "MI" "MO" "MS" "NH" "NJ" "NY" "PA"
@@ -140,43 +130,43 @@ summary(res)
 #> 
 #> Overall ATT:  
 #>      ATT    Std. Error     [ 95%  Conf. Int.] 
-#>  74.0998       59.4855   -42.4897    190.6894 
+#>  74.0998       75.4064    -73.694    221.8936 
 #> 
 #> 
 #> Dynamic Effects:
 #>  Event Time Estimate Std. Error     [95%  Conf. Band] 
-#>         -10  -4.4309     2.4017  -11.6861      2.8243 
-#>          -9   0.6468     1.8405   -4.9131      6.2067 
-#>          -8  -1.0199     2.1286   -7.4501      5.4104 
-#>          -7   4.9369     2.5523   -2.7734     12.6471 
-#>          -6   2.7974     1.7711   -2.5529      8.1477 
-#>          -5   3.3207     3.9245   -8.5348     15.1763 
-#>          -4   2.2912     3.0416   -6.8972     11.4796 
-#>          -3  -0.3394     4.6458  -14.3739     13.6951 
-#>          -2  -1.8006     2.4285   -9.1367      5.5355 
-#>          -1   1.2608     3.4020   -9.0163     11.5379 
-#>           0  -4.0483     4.0061  -16.1501      8.0536 
-#>           1  -2.8472     6.6204  -22.8467     17.1523 
-#>           2   4.6124     7.7796  -18.8887     28.1136 
-#>           3   8.6060    10.5651  -23.3101     40.5220 
-#>           4  10.9207    12.3837  -26.4889     48.3304 
-#>           5  20.6761    14.9968  -24.6273     65.9796 
-#>           6  18.3053    19.8875  -41.7726     78.3833 
-#>           7  23.3457    25.9165  -54.9449    101.6363 
-#>           8  29.1808    22.5133  -38.8293     97.1908 
-#>           9  34.8426    29.6036  -54.5864    124.2716 
-#>          10  46.7525    40.7380  -76.3123    169.8173 
-#>          11  54.3023    37.5861  -59.2411    167.8456 
-#>          12  63.0487    43.4107  -68.0900    194.1875 
-#>          13  66.3826    37.5309  -46.9940    179.7591 
-#>          14  72.4041    50.4022  -79.8553    224.6635 
-#>          15  92.5038    66.5203 -108.4465    293.4541 
-#>          16  75.2222    72.2217 -142.9510    293.3955 
-#>          17  92.4658    85.4772 -165.7510    350.6827 
-#>          18  90.5871    95.4655 -197.8032    378.9774 
-#>          19 100.4617   105.7537 -219.0080    419.9313 
-#>          20 100.4475   101.9744 -207.6054    408.5004 
-#>          21  98.0003   127.3226 -286.6266    482.6272 
+#>         -10  -4.4309     1.8225   -8.9246      0.0628 
+#>          -9   0.6468     2.1794   -4.7271      6.0207 
+#>          -8  -1.0199     1.7793   -5.4073      3.3675 
+#>          -7   4.9369     2.6123   -1.5043     11.3781 
+#>          -6   2.7974     1.8233   -1.6983      7.2931 
+#>          -5   3.3207     4.2361   -7.1243     13.7658 
+#>          -4   2.2912     2.9641   -5.0176      9.5999 
+#>          -3  -0.3394     3.8471   -9.8255      9.1466 
+#>          -2  -1.8006     2.3565   -7.6113      4.0101 
+#>          -1   1.2608     3.0173   -6.1792      8.7008 
+#>           0  -4.0483     3.4227  -12.4879      4.3913 
+#>           1  -2.8472     7.0903  -20.3301     14.6357 
+#>           2   4.6124     6.6708  -11.8360     21.0608 
+#>           3   8.6060     9.6170  -15.1070     32.3190 
+#>           4  10.9207    11.2922  -16.9230     38.7644 
+#>           5  20.6761    18.8405  -25.7799     67.1321 
+#>           6  18.3053    17.1425  -23.9638     60.5745 
+#>           7  23.3457    25.1555  -38.6814     85.3728 
+#>           8  29.1808    28.2087  -40.3749     98.7364 
+#>           9  34.8426    30.4280  -40.1851    109.8703 
+#>          10  46.7525    35.6165  -41.0690    134.5739 
+#>          11  54.3023    44.7139  -55.9510    164.5555 
+#>          12  63.0487    36.7047  -27.4558    153.5533 
+#>          13  66.3826    47.9745  -51.9105    184.6756 
+#>          14  72.4041    48.9732  -48.3514    193.1597 
+#>          15  92.5038    60.9565  -57.7997    242.8072 
+#>          16  75.2222    60.8823  -74.8981    225.3426 
+#>          17  92.4658    89.8060 -128.9733    313.9050 
+#>          18  90.5871   107.3272 -174.0547    355.2290 
+#>          19 100.4617    79.3892  -95.2921    296.2154 
+#>          20 100.4475   110.8954 -172.9928    373.8878 
+#>          21  98.0003   107.8547 -167.9422    363.9428 
 #> ---
 #> Signif. codes: `*' confidence band does not cover 0
 ```
@@ -197,4 +187,4 @@ ggplot(plot_df, aes(x=e, y=att)) +
   theme(legend.position="bottom")
 ```
 
-![](man/figures/README-unnamed-chunk-6-1.png)<!-- -->
+![](man/figures/README-unnamed-chunk-7-1.png)<!-- -->
