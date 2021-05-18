@@ -15,8 +15,17 @@ knitr::opts_chunk$set(
 ```{r, echo=FALSE, results="hide", warning=FALSE, message=FALSE}
 BMisc::source_all("~/Dropbox/pte/R/")
 BMisc::source_all("~/Dropbox/ppe/R/")
+library(ggplot2)
 ```
 # Pandemic Policy Evaluation (ppe) package
+
+The `ppe` package contains code for estimating policy effects during the pandemic.  It is the companion code for [Callaway and Li (2021).  Policy Evaluation during a Pandemic](https://arxiv.org/abs/2105.06927).  The central idea of that paper is to compare locations who implemented some policy to other locations that did not implement the policy *and that had the same pre-treatment values of Covid-19 related characteristics*.  These characteristics definitely include (i) the current number of cases and (ii) the number of susceptible individuals (or equivalently the cumulative number of cases).  They might also include demographic characteristics, population densities, region of the country, among others.  
+
+This amounts to an unconfoundedness-type strategy.  In the paper, we compare it to a difference in differences strategy and argue that the unconfoundedness strategy is likely to be more appropriate to evaluate policies during the pandemic.  The rationale for this argument is that epidemic models from the epidemiology literature are highly nonlinear but do not involve individual-level unobserved heterogeneity.  See our [five minute summary](https://bcallaway11.github.io/posts/five-minute-pandemic-policy) for additional discussion along these lines.
+
+In practice, we use a doubly robust estimation procedure that estimates both the propensity score (which is related to the treatment assigment model) and an outcome regression for untreated potential outcomes (which is related to the epidemic model).  An important advantage of this is that, at least to some extent, it allows us to side-step the issue of estimating a full epidemic model.
+
+To demonstrate our approach, we provide a shortened version of the application from our paper which is about the effect of shelter-in-place orders early in the pandemic.  We have state-level data about Covid-19 cases, tests, and the timing when a state adopted a shelter-in-place order.
 
 ```{r}
 # load the data
@@ -44,7 +53,7 @@ unique(subset(covid_data, state_id %in% time_id_list)$state)
 covid_data2 <- subset(covid_data, !(state_id %in% time_id_list))
 ```
 
-
+Next, we use the [`pte`](https://github.com/bcallaway11/pte) package to estimate policy effects.  This basically involves us only having to write a new function to compute group-time average treatment effects --- for us, it is the function [`covid_attgt`](https://github.com/bcallaway11/ppe/blob/master/R/covid_attgt.R) (which is essentially just a function to compute doubly robust treatment effect estimates under unconfoundedness and that include lags of some variables).
 
 ```{r}
 res <- pte(yname="positive",
@@ -59,4 +68,18 @@ res <- pte(yname="positive",
            min_e=-10) 
 
 summary(res)
+```
+and we can also plot the results in event study.
+```{r}
+plot_df <- summary(res)$event_study
+colnames(plot_df) <- c("e", "att", "se", "cil", "ciu")
+plot_df$post <- as.factor(1*(plot_df$e >= 0))
+ggplot(plot_df, aes(x=e, y=att)) +
+  geom_line(aes(color=post)) +
+  geom_point(aes(color=post)) + 
+  geom_line(aes(y=ciu), linetype="dashed", alpha=0.5) +
+  geom_line(aes(y=cil), linetype="dashed", alpha=0.5) +
+  ylim(c(-1000,1000)) +
+  theme_bw() +
+  theme(legend.position="bottom")
 ```
