@@ -36,7 +36,7 @@ xformla <- ~ current + current^2 + current^3 + region + totalTestResults
 ```
 
 A first issue is that there are major overlap violations  --- for example, there are just not good comparison states for New York.  As a first step, we drop those:
-```{r echo=FALSE}
+```{r results=FALSE, warning=FALSE}
 trim_id_list <- lapply(c(10,15,20,25,30),
                        did::trimmer,
                        tname="time.period",
