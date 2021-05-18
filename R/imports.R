@@ -2,7 +2,7 @@
 #' @description Tools for evaluating policies during a pandemic.
 #'
 #' @docType package
-#' @name did
+#' @name ppe
 #' @import stats
 #' @import utils
 NULL
