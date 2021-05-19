@@ -17,4 +17,7 @@ Depends:
 Imports:
     DRDID,
     sandwich,
-    tidyr
+    tidyr,
+    pte
+Remotes:
+    github::bcallaway11/pte

@@ -59,5 +59,5 @@ covid_attgt <- function(gt_data, xformla, ...) {
                               inffunc=TRUE)
 
   # return attgt
-  attgt_if(attgt=attgt$ATT, inf_func=attgt$att.inf.func)
+  pte::attgt_if(attgt=attgt$ATT, inf_func=attgt$att.inf.func)
 }

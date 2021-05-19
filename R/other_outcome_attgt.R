@@ -90,5 +90,5 @@ other_outcome_attgt <- function(gt_data, xformla, adjustI=TRUE, Iname, ...) {
   }
 
   # return attgt and influence function
-  attgt_if(attgt=attgt, inf_func=inf_func)
+  pte::attgt_if(attgt=attgt, inf_func=inf_func)
 }
