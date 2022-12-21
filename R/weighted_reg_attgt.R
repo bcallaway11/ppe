@@ -32,10 +32,12 @@ weighted_reg_attgt <- function(gt_data, xformla, weighting_method="ps", ret_impu
   # handle covariates
   #-----------------------------------------------------------------------------
   # code to match on pre-treatment characteristics
-  wres <- WeightIt::weightit(BMisc::toformula("D", BMisc::rhs.vars(xformla)),
-                                     data=subset(gt_data, name=="pre"),
-                                     estimand="ATT",
-                                     method=weighting_method)
+  wres <- WeightIt::weightit(BMisc::toformula("D",
+                                              BMisc::rhs.vars(xformla)),
+                             data=subset(gt_data, name=="pre"),
+                             estimand="ATT",
+                             method=weighting_method,
+                             stabilize=TRUE)
 
   gt_data_outcomes <- tidyr::pivot_wider(gt_data[,c("D", "id","period","name","Y")], id_cols=c(id, D),
                                          names_from=c(name),
@@ -58,11 +60,20 @@ weighted_reg_attgt <- function(gt_data, xformla, weighting_method="ps", ret_impu
   # to work in levels by just setting outcomes in "first period"
   # to be equal to 0 for all units
   gt_dataX <- droplevels(gt_dataX)
+  # drop covariates that are constant across all observations
+  # this is a bit of a hack for covid project but shouldn't
+  # cause issues generally...I think
+  covmat <- model.matrix(xformla, data=gt_dataX)
+  covmat2 <- covmat[D==0,]
+  www <- gt_dataX[D==0,]$.w
+  n_unt <- sum(1-D)
+  precheck_reg <- qr(t(www*covmat2)%*%covmat2/n_unt)
+  keep_covs <- precheck_reg$pivot[1:precheck_reg$rank]
+  covmat <- covmat[,keep_covs]
   attgt <- DRDID::reg_did_panel(y1=Y_post,
                                 y0=rep(0,length(Y_post)),
                                 D=D,
-                                covariates=model.matrix(xformla,
-                                                        data=gt_dataX),
+                                covariates=covmat,
                                 i.weights=gt_dataX$.w,
                                 inffunc=TRUE)
 

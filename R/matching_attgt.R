@@ -17,18 +17,22 @@
 #'  treatment effect
 #' @param xformla one-sided formula for covariates used in the propensity score
 #'  and outcome regression models
+#' @param matching_formula if provided, allows for the formula used to construct
+#'  the matches to be different from the outcome regression
+#' @param ret_imputations whether or not to return actual and imputed outcomes
+#'  for the treated group
 #' @param ... extra function arguments; not used here
 #'
 #' @return attgt_if
 #'
 #' @export
-matching_attgt <- function(gt_data, xformla, ...) {
+matching_attgt <- function(gt_data, xformla, matching_formula=xformla, ret_imputations=TRUE, ...) {
 
   #-----------------------------------------------------------------------------
   # handle covariates
   #-----------------------------------------------------------------------------
   # code to match on pre-treatment characteristics
-  matching_res <- MatchIt::matchit(BMisc::toformula("D", BMisc::rhs.vars(xformla)),
+  matching_res <- MatchIt::matchit(BMisc::toformula("D", BMisc::rhs.vars(matching_formula)),
                                    data=subset(gt_data, name=="pre"),
                                    replace=FALSE,
                                    distance="mahalanobis")
@@ -65,11 +69,18 @@ matching_attgt <- function(gt_data, xformla, ...) {
   # to work in levels by just setting outcomes in "first period"
   # to be equal to 0 for all units
   gt_dataX <- droplevels(gt_dataX)
+  # drop covariates that are constant across all observations
+  # this is a bit of a hack for covid project but shouldn't
+  # cause issues generally...I think
+  covmat <- model.matrix(xformla, data=gt_dataX)
+  covmat2 <- covmat[D==0, , drop=FALSE]
+  keep_covs <- apply(covmat2, 2, function(r) length(unique(r))!=1)
+  keep_covs[1] <- TRUE # keep intercept
+  covmat <- covmat[,keep_covs, drop=FALSE]
   attgt <- DRDID::reg_did_panel(y1=Y_post,
                                 y0=rep(0,length(Y_post)),
                                 D=D,
-                                covariates=model.matrix(xformla,
-                                                        data=gt_dataX),
+                                covariates=covmat,
                                 inffunc=TRUE)
 
   # account for not using all observations in the influence function
@@ -77,7 +88,16 @@ matching_attgt <- function(gt_data, xformla, ...) {
   # order to correctly cluster
   inf_func <- rep(0, nrow(subset(gt_data, name=="pre")))
   inf_func[disidx] <- (this_n/matched_n)*(attgt$att.inf.func[D==1] + attgt$att.inf.func[D==0])
+
+  # optionally return imputations
+  extra_gt_returns <- list()
+  if (ret_imputations) {
+    untreated_reg <- lm(BMisc::toformula("post", BMisc::rhs.vars(xformla)), data=subset(gt_dataX, D==0))
+    actual <- Y_post[D==1]
+    imputation <- predict(untreated_reg, newdata=subset(gt_dataX, D==1))
+    extra_gt_returns <- list(actual=actual, imputation=imputation)
+  }
   
   # return attgt
-  pte::attgt_if(attgt=attgt$ATT, inf_func=inf_func)
+  pte::attgt_if(attgt=attgt$ATT, inf_func=inf_func, extra_gt_returns=extra_gt_returns)
 }

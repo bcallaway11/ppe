@@ -89,6 +89,8 @@ other_outcome_attgt <- function(gt_data, xformla, adjustI=TRUE, Iname, ...) {
     inf_func <- if4 - if3
   }
 
+  extra_returns <- list(first_step_reg=first_step_reg)
+
   # return attgt and influence function
-  pte::attgt_if(attgt=attgt, inf_func=inf_func)
+  pte::attgt_if(attgt=attgt, inf_func=inf_func, extra_gt_returns=extra_returns)
 }

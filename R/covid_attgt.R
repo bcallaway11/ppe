@@ -22,15 +22,18 @@
 #' @return attgt_if
 #'
 #' @export
-covid_attgt <- function(gt_data, xformla, ...) {
+covid_attgt <- function(gt_data, xformla, d_outcome=FALSE, d_covs_formula=~-1, ...) {
 
   #-----------------------------------------------------------------------------
   # handle covariates
   #-----------------------------------------------------------------------------
-  # for outcome regression, get pre-treatment values
+  
+  # pre-treatment covariates
   Xpre <- model.frame(xformla, data=subset(gt_data,name=="pre"))
-  # for pscore, get pre-treatment values
-  #Xpscore <- model.frame(xformla, data=subset(gt_data,name=="pre"))
+
+  # change in covariates
+  dX <- model.frame(d_covs_formula, data=subset(gt_data,name=="post")) - model.frame(d_covs_formula, data=subset(gt_data,name=="pre"))
+  if (ncol(dX) > 0) colnames(dX) <- paste0("d", colnames(dX))
 
   # convert two period panel into one period
   gt_data_outcomes <- tidyr::pivot_wider(gt_data[,c("D","id","period","name","Y")], id_cols=c(id, D),
@@ -38,25 +41,34 @@ covid_attgt <- function(gt_data, xformla, ...) {
                                            values_from=c(Y))
 
   # merge outcome and covariate data
-  gt_dataX <- cbind.data.frame(gt_data_outcomes, Xpre)
+  gt_dataX <- cbind.data.frame(gt_data_outcomes, Xpre, dX)
 
   # treatment dummy variable
   D <- gt_dataX$D
 
   # post treatment outcome
-  Y_post <- gt_dataX$post
+  Y <- gt_dataX$post
+
+  if (d_outcome) Y <- gt_dataX$post - gt_dataX$pre
 
   # estimate attgt
   # DRDID::drdid_panel is for panel data, but we can hack it
   # to work in levels by just setting outcomes in "first period"
   # to be equal to 0 for all units
   gt_dataX <- droplevels(gt_dataX)
-  attgt <- DRDID::drdid_panel(y1=Y_post,
-                              y0=rep(0,length(Y_post)),
-                              D=D,
-                              covariates=model.matrix(xformla,
-                                                      data=gt_dataX),
-                              inffunc=TRUE)
+  use_formula <- BMisc::toformula("", c(BMisc::rhs.vars(xformla), colnames(dX)))
+  covmat <- model.matrix(use_formula, data=gt_dataX)
+  covmat2 <- covmat[D==0,]
+  #www <- gt_dataX[D==0,]$.w
+  n_unt <- sum(1-D)
+  precheck_reg <- qr(t(covmat2)%*%covmat2/n_unt)
+  keep_covs <- precheck_reg$pivot[1:precheck_reg$rank]
+  covmat <- covmat[,keep_covs]
+  attgt <- DRDID::drdid_panel(y1=Y,
+                                y0=rep(0,length(Y)),
+                                D=D,
+                                covariates=covmat,      
+                                inffunc=TRUE)
 
   # return attgt
   pte::attgt_if(attgt=attgt$ATT, inf_func=attgt$att.inf.func)
