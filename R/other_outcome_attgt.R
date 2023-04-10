@@ -1,3 +1,10 @@
+#' @title other_outcome_attgt
+#'
+#' @inheritParams covid_attgt
+#'
+#' @return attgt_if
+#'
+#' @export
 other_outcome_attgt <- function(gt_data, xformla, adjustI=TRUE, Iname, ...) {
 
   # organize data
