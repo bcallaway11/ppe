@@ -20,15 +20,13 @@ library(ggplot2)
 # Pandemic Policy Evaluation (ppe) package
 
 > **Note:** This package is only lightly maintained. Most of the general
-> functionality it provides — including empirical bootstrap inference and
+> functionality it provides — including bootstrap inference and
 > aggregation of group-time average treatment effects — is now available
 > through the `pte_default` method in the
 > [`ptetools`](https://bcallaway11.github.io/ptetools/) package
-> ([GitHub](https://github.com/bcallaway11/ptetools)). The main reason
-> to use `ppe` directly is for the pandemic-specific application and
-> estimators described below.
+> ([GitHub](https://github.com/bcallaway11/ptetools)).
 
-The `ppe` package contains code for estimating policy effects during the pandemic.  It is the companion code for [Callaway and Li (2023),  Policy Evaluation during a Pandemic](https://arxiv.org/abs/2105.06927).  The central idea of that paper is to compare locations who implemented some Covid-19 related policy to other locations that did not implement the policy *and that had the same pre-treatment values of Covid-19 related characteristics*.  These characteristics definitely include (i) the current number of cases and (ii) the number of susceptible individuals (or equivalently the cumulative number of cases).  They might also include demographic characteristics, population densities, region of the country, among others.  
+The `ppe` package contains code for estimating policy effects during the pandemic.  It is the companion code for [Callaway and Li (2023),  Policy Evaluation during a Pandemic](https://arxiv.org/abs/2105.06927).  The central idea of that paper is to compare locations who implemented some Covid-19 related policy to other locations that did not implement the policy *and that had the same pre-treatment values of Covid-19 related characteristics*.  These characteristics definitely include (i) the current number of cases and (ii) the number of susceptible individuals (or equivalently the cumulative number of cases).  They might also include demographic characteristics, population densities, region of the country, among others.
 
 This amounts to an unconfoundedness-type strategy.  In the paper, we compare it to a difference in differences strategy and argue that the unconfoundedness strategy is likely to be more appropriate to evaluate policies during the pandemic.  The rationale for this argument is that epidemic models from the epidemiology literature are highly nonlinear but do not involve individual-level unobserved heterogeneity.  See our [five minute summary](https://bcallaway11.github.io/posts/five-minute-pandemic-policy) for additional discussion along these lines.
 
@@ -46,15 +44,15 @@ xformla <- ~ current + I(current^2) + region + totalTestResults
 
 A first issue is that there are major overlap violations  --- for example, there are just not good comparison states for New York.  As a first step, we drop those:
 ```{r results=FALSE, warning=FALSE}
-trim_id_list <- lapply(c(10,15,20,25,30),
-                       did::trimmer,
-                       tname="time.period",
-                       idname="state_id",
-                       gname="group",
-                       xformla=xformla,
-                       data=covid_data,
-                       control_group="nevertreated",
-                       threshold=0.95)
+trim_id_list <- lapply(c(10, 15, 20, 25, 30),
+  did::trimmer,
+  tname = "time.period",
+  idname = "state_id",
+  gname = "group",
+  xformla = xformla,
+  data = covid_data,
+  control_group = "nevertreated",
+  threshold = 0.95)
 time_id_list <- unlist(trim_id_list)
 ```
 
@@ -67,44 +65,44 @@ covid_data2 <- subset(covid_data, !(state_id %in% time_id_list))
 Next, we use the [`pte`](https://github.com/bcallaway11/pte) package to estimate policy effects.  This basically involves us only having to write a new function to compute group-time average treatment effects --- for us, it is the function [`covid_attgt`](https://github.com/bcallaway11/ppe/blob/master/R/covid_attgt.R) (which is essentially just a function to compute doubly robust treatment effect estimates under unconfoundedness and that include lags of some variables).
 
 ```{r}
-res <- pte(yname="positive",
-           gname="group",
-           tname="time.period",
-           idname="state_id",
-           data=covid_data2,
-           subset_fun=two_by_two_subset,
-           setup_pte_fun=setup_pte_basic,
-           attgt_fun=covid_attgt,
-           xformla=xformla,
-           max_e=21,
-           min_e=-10) 
+res <- pte(yname = "positive",
+  gname = "group",
+  tname = "time.period",
+  idname = "state_id",
+  data = covid_data2,
+  subset_fun = two_by_two_subset,
+  setup_pte_fun = setup_pte_basic,
+  attgt_fun = covid_attgt,
+  xformla = xformla,
+  max_e = 21,
+  min_e = -10)
 
 summary(res)
 ```
 and we can also plot the results in event study.
 ```{r}
-ggpte(res) + ylim(c(-1000,1000))
+ggpte(res) + ylim(c(-1000, 1000))
 ```
 
 To conclude, we provide estimated effects of the effects of shelter-in-place orders on travel.  In the paper, we mainly consider the case where (i) the policy can have a direct effect on travel, (ii) the policy can have a direct effect on Covid-19 cases, and (iii) Covid-19 cases can have their own effect on travel.  This means that the policy can have an indirect effect on travel through its effect on Covid-19 cases.  We show in the paper that neither standard DID (ignoring cases) nor DID that includes current cases as a covariate delivers a suitable estimate of the effect of the policy on travel in this case.  We propose an alternative estimator that accounts for the indirect effect of the policy on travel through its effect on cases, and show code for this approach below.
 
 ```{r}
-oo_res <- pte(yname="retail_and_recreation_percent_change_from_baseline",
-           gname="group",
-           tname="time.period",
-           idname="state_id",
-           data=covid_data2,
-           subset_fun=two_by_two_subset,
-           setup_pte_fun=setup_pte_basic,
-           attgt_fun=other_outcome_attgt,
-           xformla=xformla,
-           max_e=21,
-           min_e=-10,
-           Iname="current",
-           adjustI=TRUE) 
+oo_res <- pte(yname = "retail_and_recreation_percent_change_from_baseline",
+  gname = "group",
+  tname = "time.period",
+  idname = "state_id",
+  data = covid_data2,
+  subset_fun = two_by_two_subset,
+  setup_pte_fun = setup_pte_basic,
+  attgt_fun = other_outcome_attgt,
+  xformla = xformla,
+  max_e = 21,
+  min_e = -10,
+  Iname = "current",
+  adjustI = TRUE)
 
 summary(oo_res)
 
 # make an event study plot
-ggpte(oo_res) + ylim(c(-30,30))
+ggpte(oo_res) + ylim(c(-30, 30))
 ```

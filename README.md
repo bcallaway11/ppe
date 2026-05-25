@@ -4,13 +4,11 @@
 # Pandemic Policy Evaluation (ppe) package
 
 > **Note:** This package is only lightly maintained. Most of the general
-> functionality it provides — including empirical bootstrap inference
-> and aggregation of group-time average treatment effects — is now
-> available through the `pte_default` method in the
+> functionality it provides — including bootstrap inference and
+> aggregation of group-time average treatment effects — is now available
+> through the `pte_default` method in the
 > [`ptetools`](https://bcallaway11.github.io/ptetools/) package
-> ([GitHub](https://github.com/bcallaway11/ptetools)). The main reason
-> to use `ppe` directly is for the pandemic-specific application and
-> estimators described below.
+> ([GitHub](https://github.com/bcallaway11/ptetools)).
 
 The `ppe` package contains code for estimating policy effects during the
 pandemic. It is the companion code for [Callaway and Li (2023), Policy
@@ -60,15 +58,15 @@ there are just not good comparison states for New York. As a first step,
 we drop those:
 
 ``` r
-trim_id_list <- lapply(c(10,15,20,25,30),
-                       did::trimmer,
-                       tname="time.period",
-                       idname="state_id",
-                       gname="group",
-                       xformla=xformla,
-                       data=covid_data,
-                       control_group="nevertreated",
-                       threshold=0.95)
+trim_id_list <- lapply(c(10, 15, 20, 25, 30),
+  did::trimmer,
+  tname = "time.period",
+  idname = "state_id",
+  gname = "group",
+  xformla = xformla,
+  data = covid_data,
+  control_group = "nevertreated",
+  threshold = 0.95)
 time_id_list <- unlist(trim_id_list)
 ```
 
@@ -90,17 +88,17 @@ effect estimates under unconfoundedness and that include lags of some
 variables).
 
 ``` r
-res <- pte(yname="positive",
-           gname="group",
-           tname="time.period",
-           idname="state_id",
-           data=covid_data2,
-           subset_fun=two_by_two_subset,
-           setup_pte_fun=setup_pte_basic,
-           attgt_fun=covid_attgt,
-           xformla=xformla,
-           max_e=21,
-           min_e=-10) 
+res <- pte(yname = "positive",
+  gname = "group",
+  tname = "time.period",
+  idname = "state_id",
+  data = covid_data2,
+  subset_fun = two_by_two_subset,
+  setup_pte_fun = setup_pte_basic,
+  attgt_fun = covid_attgt,
+  xformla = xformla,
+  max_e = 21,
+  min_e = -10)
 #> Warning in pte(yname = "positive", gname = "group", tname = "time.period", : 'pte' is deprecated.
 #> Use 'pte2' instead.
 #> See help("Deprecated")
@@ -121,43 +119,43 @@ summary(res)
 #> 
 #> Overall ATT:  
 #>      ATT    Std. Error     [ 95%  Conf. Int.] 
-#>  14.8882       79.4475  -140.8261    170.6024 
+#>  14.8882       80.1842  -142.2701    172.0464 
 #> 
 #> 
 #> Dynamic Effects:
 #>  Event Time Estimate Std. Error     [95%  Conf. Band] 
-#>         -10  -3.7266     3.5727  -12.8078      5.3545 
-#>          -9   2.6607     1.5442   -1.2643      6.5857 
-#>          -8   0.8290     2.5877   -5.7485      7.4065 
-#>          -7   5.2843     2.3458   -0.6782     11.2469 
-#>          -6   2.8555     1.9498   -2.1005      7.8115 
-#>          -5   1.3589     4.6737  -10.5208     13.2386 
-#>          -4   0.3294     4.0833  -10.0496     10.7083 
-#>          -3  -4.2227     5.2468  -17.5591      9.1137 
-#>          -2  -3.8447     2.4588  -10.0945      2.4050 
-#>          -1  -0.2234     3.5167   -9.1621      8.7154 
-#>           0 -10.8156    10.8095  -38.2912     16.6600 
-#>           1 -13.7998    14.5778  -50.8536     23.2540 
-#>           2  -7.8432    11.0886  -36.0281     20.3417 
-#>           3  -4.5541    11.9893  -35.0284     25.9201 
-#>           4  -3.5368    11.8730  -33.7156     26.6419 
-#>           5   8.5221    12.9938  -24.5055     41.5497 
-#>           6   1.1140    13.6408  -33.5583     35.7863 
-#>           7   6.6384    21.0232  -46.7984     60.0753 
-#>           8   7.1288    34.7259  -81.1374     95.3950 
-#>           9  10.8758    29.5162  -64.1483     85.8999 
-#>          10  17.5057    32.9132  -66.1531    101.1645 
-#>          11  40.8318    42.1074  -66.1966    147.8602 
-#>          12  48.6134    56.4684  -94.9179    192.1447 
-#>          13  52.4228    67.6682 -119.5761    224.4217 
-#>          14  50.2000    42.6587  -58.2296    158.6297 
-#>          15  68.2960    86.8683 -152.5056    289.0976 
-#>          16  44.7305    77.7393 -152.8670    242.3280 
-#>          17  61.4670    77.5732 -135.7085    258.6424 
-#>          18  50.4635   116.4089 -245.4243    346.3513 
-#>          19  47.3392   110.6619 -233.9410    328.6194 
-#>          20  28.6326   137.6517 -321.2501    378.5153 
-#>          21   4.3445   146.0782 -366.9567    375.6457 
+#>         -10  -3.7266     3.5260  -13.1880      5.7347 
+#>          -9   2.6607     1.5159   -1.4071      6.7284 
+#>          -8   0.8290     2.3408   -5.4522      7.1102 
+#>          -7   5.2843     2.0268   -0.1542     10.7229 
+#>          -6   2.8555     1.9758   -2.4462      8.1572 
+#>          -5   1.3589     3.9120   -9.1383     11.8561 
+#>          -4   0.3294     3.8860  -10.0980     10.7568 
+#>          -3  -4.2227     5.6703  -19.4379     10.9926 
+#>          -2  -3.8447     2.7654  -11.2652      3.5757 
+#>          -1  -0.2234     3.5667   -9.7940      9.3472 
+#>           0 -10.8156     9.0546  -35.1123     13.4811 
+#>           1 -13.7998    14.0387  -51.4704     23.8708 
+#>           2  -7.8432    10.5938  -36.2700     20.5836 
+#>           3  -4.5541    10.2174  -31.9708     22.8625 
+#>           4  -3.5368    12.5919  -37.3253     30.2516 
+#>           5   8.5221    14.5763  -30.5911     47.6353 
+#>           6   1.1140    15.4788  -40.4209     42.6489 
+#>           7   6.6384    19.8961  -46.7497     60.0266 
+#>           8   7.1288    34.1376  -84.4740     98.7316 
+#>           9  10.8758    28.7639  -66.3075     88.0592 
+#>          10  17.5057    31.4284  -66.8275    101.8389 
+#>          11  40.8318    36.1131  -56.0721    137.7357 
+#>          12  48.6134    57.6837 -106.1718    203.3985 
+#>          13  52.4228    54.2404  -93.1227    197.9683 
+#>          14  50.2000    65.6197 -125.8801    226.2801 
+#>          15  68.2960    68.5511 -115.6500    252.2420 
+#>          16  44.7305    82.0383 -175.4064    264.8674 
+#>          17  61.4670    96.6043 -197.7555    320.6894 
+#>          18  50.4635   113.8958 -255.1580    356.0850 
+#>          19  47.3392   111.7736 -252.5877    347.2661 
+#>          20  28.6326   148.8780 -370.8582    428.1234 
+#>          21   4.3445   149.9413 -397.9995    406.6886 
 #> ---
 #> Signif. codes: `*' confidence band does not cover 0
 ```
@@ -165,7 +163,7 @@ summary(res)
 and we can also plot the results in event study.
 
 ``` r
-ggpte(res) + ylim(c(-1000,1000))
+ggpte(res) + ylim(c(-1000, 1000))
 ```
 
 ![](man/figures/README-unnamed-chunk-7-1.png)<!-- -->
@@ -184,19 +182,19 @@ policy on travel through its effect on cases, and show code for this
 approach below.
 
 ``` r
-oo_res <- pte(yname="retail_and_recreation_percent_change_from_baseline",
-           gname="group",
-           tname="time.period",
-           idname="state_id",
-           data=covid_data2,
-           subset_fun=two_by_two_subset,
-           setup_pte_fun=setup_pte_basic,
-           attgt_fun=other_outcome_attgt,
-           xformla=xformla,
-           max_e=21,
-           min_e=-10,
-           Iname="current",
-           adjustI=TRUE) 
+oo_res <- pte(yname = "retail_and_recreation_percent_change_from_baseline",
+  gname = "group",
+  tname = "time.period",
+  idname = "state_id",
+  data = covid_data2,
+  subset_fun = two_by_two_subset,
+  setup_pte_fun = setup_pte_basic,
+  attgt_fun = other_outcome_attgt,
+  xformla = xformla,
+  max_e = 21,
+  min_e = -10,
+  Iname = "current",
+  adjustI = TRUE)
 #> Warning in pte(yname = "retail_and_recreation_percent_change_from_baseline", : 'pte' is deprecated.
 #> Use 'pte2' instead.
 #> See help("Deprecated")
@@ -216,49 +214,49 @@ oo_res <- pte(yname="retail_and_recreation_percent_change_from_baseline",
 summary(oo_res)
 #> 
 #> Overall ATT:  
-#>      ATT    Std. Error     [ 95%  Conf. Int.]  
-#>  -3.9162        1.9043    -7.6485      -0.184 *
+#>      ATT    Std. Error     [ 95%  Conf. Int.] 
+#>  -3.9162        2.0164    -7.8683      0.0358 
 #> 
 #> 
 #> Dynamic Effects:
 #>  Event Time Estimate Std. Error    [95%  Conf. Band]  
-#>         -10  -3.0210     2.4073 -10.3959      4.3539  
-#>          -9   2.7846     1.3531  -1.3606      6.9299  
-#>          -8   0.2543     1.4666  -4.2388      4.7475  
-#>          -7  -1.2765     0.9152  -4.0804      1.5273  
-#>          -6  -0.9085     1.2627  -4.7767      2.9597  
-#>          -5  -0.6359     1.4899  -5.2004      3.9286  
-#>          -4   1.6184     1.1964  -2.0468      5.2837  
-#>          -3  -0.4660     1.0718  -3.7496      2.8176  
-#>          -2   0.7693     0.7319  -1.4730      3.0117  
-#>          -1   0.2643     1.1686  -3.3160      3.8445  
-#>           0  -0.8510     2.1805  -7.5311      5.8290  
-#>           1  -5.5461     2.0183 -11.7292      0.6370  
-#>           2  -6.5928     1.6265 -11.5758     -1.6099 *
-#>           3  -6.7447     1.7367 -12.0652     -1.4243 *
-#>           4  -7.2925     1.8923 -13.0897     -1.4954 *
-#>           5  -3.6784     2.2736 -10.6439      3.2871  
-#>           6  -4.9731     2.0578 -11.2773      1.3311  
-#>           7  -4.0683     2.2042 -10.8210      2.6844  
-#>           8  -6.1649     1.7244 -11.4477     -0.8821 *
-#>           9  -5.9830     1.9759 -12.0363      0.0703  
-#>          10  -1.4185     2.4645  -8.9687      6.1317  
-#>          11  -2.4974     2.2211  -9.3020      4.3072  
-#>          12  -1.9884     1.7679  -7.4044      3.4275  
-#>          13  -3.3056     2.0270  -9.5155      2.9044  
-#>          14  -2.4633     2.3299  -9.6010      4.6744  
-#>          15  -3.8627     1.9979  -9.9835      2.2582  
-#>          16  -3.3849     1.9396  -9.3270      2.5571  
-#>          17  -2.1404     2.2201  -8.9419      4.6612  
-#>          18  -6.1309     1.7688 -11.5498     -0.7119 *
-#>          19  -0.7883     2.2083  -7.5536      5.9770  
-#>          20   0.6190     2.6606  -7.5319      8.7700  
-#>          21  -5.0789     2.9730 -14.1870      4.0291  
+#>         -10  -3.0210     1.6270  -8.0522      2.0102  
+#>          -9   2.7846     1.6460  -2.3053      7.8745  
+#>          -8   0.2543     1.2054  -3.4731      3.9818  
+#>          -7  -1.2765     1.0667  -4.5749      2.0219  
+#>          -6  -0.9085     1.4291  -5.3276      3.5106  
+#>          -5  -0.6359     1.3543  -4.8237      3.5519  
+#>          -4   1.6184     1.2284  -2.1801      5.4170  
+#>          -3  -0.4660     1.0130  -3.5983      2.6664  
+#>          -2   0.7693     0.9277  -2.0993      3.6380  
+#>          -1   0.2643     1.1694  -3.3519      3.8805  
+#>           0  -0.8510     2.7673  -9.4083      7.7063  
+#>           1  -5.5461     1.8829 -11.3686      0.2764  
+#>           2  -6.5928     1.6687 -11.7529     -1.4328 *
+#>           3  -6.7447     1.7644 -12.2006     -1.2889 *
+#>           4  -7.2925     2.0251 -13.5546     -1.0305 *
+#>           5  -3.6784     1.9895  -9.8303      2.4735  
+#>           6  -4.9731     2.1774 -11.7061      1.7600  
+#>           7  -4.0683     2.2418 -11.0005      2.8639  
+#>           8  -6.1649     1.5662 -11.0079     -1.3218 *
+#>           9  -5.9830     1.9783 -12.1004      0.1344  
+#>          10  -1.4185     1.9735  -7.5211      4.6840  
+#>          11  -2.4974     1.9754  -8.6059      3.6111  
+#>          12  -1.9884     1.4407  -6.4435      2.4667  
+#>          13  -3.3056     1.6858  -8.5186      1.9075  
+#>          14  -2.4633     2.4494 -10.0375      5.1109  
+#>          15  -3.8627     2.2821 -10.9194      3.1941  
+#>          16  -3.3849     1.5453  -8.1633      1.3934  
+#>          17  -2.1404     2.2130  -8.9836      4.7028  
+#>          18  -6.1309     2.1120 -12.6617      0.3999  
+#>          19  -0.7883     2.7617  -9.3282      7.7516  
+#>          20   0.6190     2.3223  -6.5620      7.8001  
+#>          21  -5.0789     2.1830 -11.8292      1.6714  
 #> ---
 #> Signif. codes: `*' confidence band does not cover 0
 
 # make an event study plot
-ggpte(oo_res) + ylim(c(-30,30))
+ggpte(oo_res) + ylim(c(-30, 30))
 ```
 
 ![](man/figures/README-unnamed-chunk-8-1.png)<!-- -->
