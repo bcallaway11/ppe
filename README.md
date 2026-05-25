@@ -3,6 +3,15 @@
 
 # Pandemic Policy Evaluation (ppe) package
 
+> **Note:** This package is only lightly maintained. Most of the general
+> functionality it provides — including empirical bootstrap inference
+> and aggregation of group-time average treatment effects — is now
+> available through the `pte_default` method in the
+> [`ptetools`](https://bcallaway11.github.io/ptetools/) package
+> ([GitHub](https://github.com/bcallaway11/ptetools)). The main reason
+> to use `ppe` directly is for the pandemic-specific application and
+> estimators described below.
+
 The `ppe` package contains code for estimating policy effects during the
 pandemic. It is the companion code for [Callaway and Li (2023), Policy
 Evaluation during a Pandemic](https://arxiv.org/abs/2105.06927). The
@@ -92,48 +101,63 @@ res <- pte(yname="positive",
            xformla=xformla,
            max_e=21,
            min_e=-10) 
+#> Warning in pte(yname = "positive", gname = "group", tname = "time.period", : 'pte' is deprecated.
+#> Use 'pte2' instead.
+#> See help("Deprecated")
+#> Warning in BMisc::getListElement(selective.se.inner, "se"): 'BMisc::getListElement' is deprecated.
+#> Use 'get_list_element' instead.
+#> See help("Deprecated")
+#> Warning in BMisc::getListElement(selective.se.inner, "inf.func"): 'BMisc::getListElement' is deprecated.
+#> Use 'get_list_element' instead.
+#> See help("Deprecated")
+#> Warning in BMisc::getListElement(dynamic.se.inner, "se"): 'BMisc::getListElement' is deprecated.
+#> Use 'get_list_element' instead.
+#> See help("Deprecated")
+#> Warning in BMisc::getListElement(dynamic.se.inner, "inf.func"): 'BMisc::getListElement' is deprecated.
+#> Use 'get_list_element' instead.
+#> See help("Deprecated")
 
 summary(res)
 #> 
 #> Overall ATT:  
 #>      ATT    Std. Error     [ 95%  Conf. Int.] 
-#>  14.8882       94.6445  -170.6117     200.388 
+#>  14.8882       79.4475  -140.8261    170.6024 
 #> 
 #> 
 #> Dynamic Effects:
-#>  Event Time Estimate Std. Error     [95%  Conf. Band]  
-#>         -10  -3.7266     3.5462  -13.1725      5.7192  
-#>          -9   2.6607     1.5290   -1.4121      6.7335  
-#>          -8   0.8290     2.2085   -5.0538      6.7117  
-#>          -7   5.2843     1.7238    0.6929      9.8758 *
-#>          -6   2.8555     1.9809   -2.4210      8.1320  
-#>          -5   1.3589     3.3550   -7.5775     10.2953  
-#>          -4   0.3294     3.2940   -8.4445      9.1033  
-#>          -3  -4.2227     5.7334  -19.4943     11.0490  
-#>          -2  -3.8447     2.7204  -11.0910      3.4015  
-#>          -1  -0.2234     3.1731   -8.6753      8.2285  
-#>           0 -10.8156     9.4857  -36.0821     14.4508  
-#>           1 -13.7998    15.0944  -54.0057     26.4061  
-#>           2  -7.8432    12.9323  -42.2899     26.6035  
-#>           3  -4.5541     9.4707  -29.7805     20.6722  
-#>           4  -3.5368    10.9555  -32.7181     25.6445  
-#>           5   8.5221    15.0145  -31.4709     48.5151  
-#>           6   1.1140    17.5362  -45.5959     47.8239  
-#>           7   6.6384    20.1748  -47.0996     60.3765  
-#>           8   7.1288    26.4804  -63.4052     77.6628  
-#>           9  10.8758    30.8404  -71.2715     93.0232  
-#>          10  17.5057    29.7749  -61.8034     96.8148  
-#>          11  40.8318    42.3066  -71.8570    153.5206  
-#>          12  48.6134    46.9495  -76.4424    173.6692  
-#>          13  52.4228    52.5594  -87.5757    192.4213  
-#>          14  50.2000    56.7979 -101.0883    201.4884  
-#>          15  68.2960    80.3536 -145.7358    282.3279  
-#>          16  44.7305    69.2848 -139.8183    229.2793  
-#>          17  61.4670   104.2957 -216.3376    339.2715  
-#>          18  50.4635   110.5002 -243.8676    344.7946  
-#>          19  47.3392   108.5430 -241.7786    336.4570  
-#>          20  28.6326   110.3186 -265.2147    322.4800  
-#>          21   4.3445   156.0880 -411.4153    420.1044  
+#>  Event Time Estimate Std. Error     [95%  Conf. Band] 
+#>         -10  -3.7266     3.5727  -12.8078      5.3545 
+#>          -9   2.6607     1.5442   -1.2643      6.5857 
+#>          -8   0.8290     2.5877   -5.7485      7.4065 
+#>          -7   5.2843     2.3458   -0.6782     11.2469 
+#>          -6   2.8555     1.9498   -2.1005      7.8115 
+#>          -5   1.3589     4.6737  -10.5208     13.2386 
+#>          -4   0.3294     4.0833  -10.0496     10.7083 
+#>          -3  -4.2227     5.2468  -17.5591      9.1137 
+#>          -2  -3.8447     2.4588  -10.0945      2.4050 
+#>          -1  -0.2234     3.5167   -9.1621      8.7154 
+#>           0 -10.8156    10.8095  -38.2912     16.6600 
+#>           1 -13.7998    14.5778  -50.8536     23.2540 
+#>           2  -7.8432    11.0886  -36.0281     20.3417 
+#>           3  -4.5541    11.9893  -35.0284     25.9201 
+#>           4  -3.5368    11.8730  -33.7156     26.6419 
+#>           5   8.5221    12.9938  -24.5055     41.5497 
+#>           6   1.1140    13.6408  -33.5583     35.7863 
+#>           7   6.6384    21.0232  -46.7984     60.0753 
+#>           8   7.1288    34.7259  -81.1374     95.3950 
+#>           9  10.8758    29.5162  -64.1483     85.8999 
+#>          10  17.5057    32.9132  -66.1531    101.1645 
+#>          11  40.8318    42.1074  -66.1966    147.8602 
+#>          12  48.6134    56.4684  -94.9179    192.1447 
+#>          13  52.4228    67.6682 -119.5761    224.4217 
+#>          14  50.2000    42.6587  -58.2296    158.6297 
+#>          15  68.2960    86.8683 -152.5056    289.0976 
+#>          16  44.7305    77.7393 -152.8670    242.3280 
+#>          17  61.4670    77.5732 -135.7085    258.6424 
+#>          18  50.4635   116.4089 -245.4243    346.3513 
+#>          19  47.3392   110.6619 -233.9410    328.6194 
+#>          20  28.6326   137.6517 -321.2501    378.5153 
+#>          21   4.3445   146.0782 -366.9567    375.6457 
 #> ---
 #> Signif. codes: `*' confidence band does not cover 0
 ```
@@ -173,48 +197,63 @@ oo_res <- pte(yname="retail_and_recreation_percent_change_from_baseline",
            min_e=-10,
            Iname="current",
            adjustI=TRUE) 
+#> Warning in pte(yname = "retail_and_recreation_percent_change_from_baseline", : 'pte' is deprecated.
+#> Use 'pte2' instead.
+#> See help("Deprecated")
+#> Warning in BMisc::getListElement(selective.se.inner, "se"): 'BMisc::getListElement' is deprecated.
+#> Use 'get_list_element' instead.
+#> See help("Deprecated")
+#> Warning in BMisc::getListElement(selective.se.inner, "inf.func"): 'BMisc::getListElement' is deprecated.
+#> Use 'get_list_element' instead.
+#> See help("Deprecated")
+#> Warning in BMisc::getListElement(dynamic.se.inner, "se"): 'BMisc::getListElement' is deprecated.
+#> Use 'get_list_element' instead.
+#> See help("Deprecated")
+#> Warning in BMisc::getListElement(dynamic.se.inner, "inf.func"): 'BMisc::getListElement' is deprecated.
+#> Use 'get_list_element' instead.
+#> See help("Deprecated")
 
 summary(oo_res)
 #> 
 #> Overall ATT:  
-#>      ATT    Std. Error     [ 95%  Conf. Int.] 
-#>  -3.9162        1.9992    -7.8346      0.0021 
+#>      ATT    Std. Error     [ 95%  Conf. Int.]  
+#>  -3.9162        1.9043    -7.6485      -0.184 *
 #> 
 #> 
 #> Dynamic Effects:
 #>  Event Time Estimate Std. Error    [95%  Conf. Band]  
-#>         -10  -3.0210     1.9257  -8.9866      2.9446  
-#>          -9   2.7846     1.7390  -2.6024      8.1716  
-#>          -8   0.2543     1.5070  -4.4140      4.9227  
-#>          -7  -1.2765     0.8811  -4.0059      1.4529  
-#>          -6  -0.9085     1.1079  -4.3407      2.5237  
-#>          -5  -0.6359     1.2406  -4.4790      3.2071  
-#>          -4   1.6184     1.3089  -2.4363      5.6732  
-#>          -3  -0.4660     0.9118  -3.2907      2.3588  
-#>          -2   0.7693     1.1197  -2.6993      4.2380  
-#>          -1   0.2643     0.9478  -2.6717      3.2002  
-#>           0  -0.8510     2.1891  -7.6326      5.9305  
-#>           1  -5.5461     2.1491 -12.2037      1.1116  
-#>           2  -6.5928     1.6279 -11.6356     -1.5500 *
-#>           3  -6.7447     2.0879 -13.2126     -0.2769 *
-#>           4  -7.2925     1.9662 -13.3834     -1.2017 *
-#>           5  -3.6784     2.6473 -11.8792      4.5224  
-#>           6  -4.9731     1.9253 -10.9373      0.9911  
-#>           7  -4.0683     2.2645 -11.0835      2.9469  
-#>           8  -6.1649     1.6756 -11.3555     -0.9742 *
-#>           9  -5.9830     1.3731 -10.2365     -1.7295 *
-#>          10  -1.4185     2.0007  -7.6162      4.7792  
-#>          11  -2.4974     1.7783  -8.0062      3.0114  
-#>          12  -1.9884     1.4214  -6.3918      2.4149  
-#>          13  -3.3056     2.1034  -9.8216      3.2105  
-#>          14  -2.4633     1.9937  -8.6393      3.7127  
-#>          15  -3.8627     2.0857 -10.3239      2.5986  
-#>          16  -3.3849     1.7224  -8.7206      1.9508  
-#>          17  -2.1404     2.2102  -8.9872      4.7065  
-#>          18  -6.1309     2.3983 -13.5605      1.2987  
-#>          19  -0.7883     2.7191  -9.2115      7.6350  
-#>          20   0.6190     2.7521  -7.9066      9.1447  
-#>          21  -5.0789     3.0584 -14.5533      4.3954  
+#>         -10  -3.0210     2.4073 -10.3959      4.3539  
+#>          -9   2.7846     1.3531  -1.3606      6.9299  
+#>          -8   0.2543     1.4666  -4.2388      4.7475  
+#>          -7  -1.2765     0.9152  -4.0804      1.5273  
+#>          -6  -0.9085     1.2627  -4.7767      2.9597  
+#>          -5  -0.6359     1.4899  -5.2004      3.9286  
+#>          -4   1.6184     1.1964  -2.0468      5.2837  
+#>          -3  -0.4660     1.0718  -3.7496      2.8176  
+#>          -2   0.7693     0.7319  -1.4730      3.0117  
+#>          -1   0.2643     1.1686  -3.3160      3.8445  
+#>           0  -0.8510     2.1805  -7.5311      5.8290  
+#>           1  -5.5461     2.0183 -11.7292      0.6370  
+#>           2  -6.5928     1.6265 -11.5758     -1.6099 *
+#>           3  -6.7447     1.7367 -12.0652     -1.4243 *
+#>           4  -7.2925     1.8923 -13.0897     -1.4954 *
+#>           5  -3.6784     2.2736 -10.6439      3.2871  
+#>           6  -4.9731     2.0578 -11.2773      1.3311  
+#>           7  -4.0683     2.2042 -10.8210      2.6844  
+#>           8  -6.1649     1.7244 -11.4477     -0.8821 *
+#>           9  -5.9830     1.9759 -12.0363      0.0703  
+#>          10  -1.4185     2.4645  -8.9687      6.1317  
+#>          11  -2.4974     2.2211  -9.3020      4.3072  
+#>          12  -1.9884     1.7679  -7.4044      3.4275  
+#>          13  -3.3056     2.0270  -9.5155      2.9044  
+#>          14  -2.4633     2.3299  -9.6010      4.6744  
+#>          15  -3.8627     1.9979  -9.9835      2.2582  
+#>          16  -3.3849     1.9396  -9.3270      2.5571  
+#>          17  -2.1404     2.2201  -8.9419      4.6612  
+#>          18  -6.1309     1.7688 -11.5498     -0.7119 *
+#>          19  -0.7883     2.2083  -7.5536      5.9770  
+#>          20   0.6190     2.6606  -7.5319      8.7700  
+#>          21  -5.0789     2.9730 -14.1870      4.0291  
 #> ---
 #> Signif. codes: `*' confidence band does not cover 0
 

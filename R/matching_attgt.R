@@ -32,7 +32,7 @@ matching_attgt <- function(gt_data, xformla, matching_formula=xformla, ret_imput
   # handle covariates
   #-----------------------------------------------------------------------------
   # code to match on pre-treatment characteristics
-  matching_res <- MatchIt::matchit(BMisc::toformula("D", BMisc::rhs.vars(matching_formula)),
+  matching_res <- MatchIt::matchit(BMisc::toformula("D", BMisc::rhs_vars(matching_formula)),
                                    data=subset(gt_data, name=="pre"),
                                    replace=FALSE,
                                    distance="mahalanobis")
@@ -92,7 +92,7 @@ matching_attgt <- function(gt_data, xformla, matching_formula=xformla, ret_imput
   # optionally return imputations
   extra_gt_returns <- list()
   if (ret_imputations) {
-    untreated_reg <- lm(BMisc::toformula("post", BMisc::rhs.vars(xformla)), data=subset(gt_dataX, D==0))
+    untreated_reg <- lm(BMisc::toformula("post", BMisc::rhs_vars(xformla)), data=subset(gt_dataX, D==0))
     actual <- Y_post[D==1]
     imputation <- predict(untreated_reg, newdata=subset(gt_dataX, D==1))
     extra_gt_returns <- list(actual=actual, imputation=imputation)

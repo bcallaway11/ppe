@@ -56,7 +56,7 @@ covid_attgt <- function(gt_data, xformla, d_outcome=FALSE, d_covs_formula=~-1, .
   # to work in levels by just setting outcomes in "first period"
   # to be equal to 0 for all units
   gt_dataX <- droplevels(gt_dataX)
-  use_formula <- BMisc::toformula("", c(BMisc::rhs.vars(xformla), colnames(dX)))
+  use_formula <- BMisc::toformula("", c(BMisc::rhs_vars(xformla), colnames(dX)))
   covmat <- model.matrix(use_formula, data=gt_dataX)
   covmat2 <- covmat[D==0,]
   #www <- gt_dataX[D==0,]$.w

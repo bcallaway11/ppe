@@ -33,7 +33,7 @@ weighted_reg_attgt <- function(gt_data, xformla, weighting_method="ps", ret_impu
   #-----------------------------------------------------------------------------
   # code to match on pre-treatment characteristics
   wres <- WeightIt::weightit(BMisc::toformula("D",
-                                              BMisc::rhs.vars(xformla)),
+                                              BMisc::rhs_vars(xformla)),
                              data=subset(gt_data, name=="pre"),
                              estimand="ATT",
                              method=weighting_method,
@@ -81,7 +81,7 @@ weighted_reg_attgt <- function(gt_data, xformla, weighting_method="ps", ret_impu
   # optionally return imputations
   extra_gt_returns <- list()
   if (ret_imputations) {
-    untreated_reg <- lm(BMisc::toformula("post", BMisc::rhs.vars(xformla)), data=subset(gt_dataX, D==0), weights=.w)
+    untreated_reg <- lm(BMisc::toformula("post", BMisc::rhs_vars(xformla)), data=subset(gt_dataX, D==0), weights=.w)
     actual <- Y_post[D==1]
     imputation <- predict(untreated_reg, newdata=subset(gt_dataX, D==1))
     extra_gt_returns <- list(actual=actual, imputation=imputation)
